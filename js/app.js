@@ -4,6 +4,7 @@ import { fmtNum, fmtVol, colorClass, arrow, showToast } from './utils.js';
 import { drawChart } from './chart.js';
 import { renderStockList, saveWatchlist } from './watchlist.js';
 import { renderIndicesBar, refreshIndices } from './indices.js';
+import { fetchIndicators } from './indicators.js';
 
 // ── Clock ──────────────────────────────────────────────────
 function updateClock() {
@@ -12,6 +13,48 @@ function updateClock() {
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hour12: false,
   });
+}
+
+// ── Indicators render ──────────────────────────────────────
+function renderIndicators(ind, quote) {
+  const panel = document.getElementById('indicators-panel');
+  if (!ind) return;
+
+  const fmt = (v, d = 1) => v != null ? v.toFixed(d) : '--';
+
+  function kdSig(k, d) {
+    if (k == null) return '';
+    if (k >= 80) return '<span class="ind-sig ob">超買</span>';
+    if (k <= 20) return '<span class="ind-sig os">超賣</span>';
+    if (k > d)   return '<span class="ind-sig bull">金叉↑</span>';
+    if (k < d)   return '<span class="ind-sig bear">死叉↓</span>';
+    return '';
+  }
+
+  function rsiSig(r) {
+    if (r == null) return '';
+    if (r >= 70) return '<span class="ind-sig ob">超買</span>';
+    if (r <= 30) return '<span class="ind-sig os">超賣</span>';
+    if (r >= 50) return '<span class="ind-sig bull">偏多</span>';
+    return '<span class="ind-sig bear">偏空</span>';
+  }
+
+  const p = quote?.price;
+  const maClass = ma => (!p || !ma) ? '' : p >= ma ? 'up' : 'down';
+
+  document.getElementById('ind-ma5').innerHTML  = `<span class="${maClass(ind.ma5)}">${fmt(ind.ma5, 2)}</span>`;
+  document.getElementById('ind-ma20').innerHTML = `<span class="${maClass(ind.ma20)}">${fmt(ind.ma20, 2)}</span>`;
+  document.getElementById('ind-ma60').innerHTML = `<span class="${maClass(ind.ma60)}">${fmt(ind.ma60, 2)}</span>`;
+  document.getElementById('ind-dk').textContent       = fmt(ind.dailyK);
+  document.getElementById('ind-dd').textContent       = fmt(ind.dailyD);
+  document.getElementById('ind-dk-sig').innerHTML     = kdSig(ind.dailyK, ind.dailyD);
+  document.getElementById('ind-mk').textContent       = fmt(ind.monthlyK);
+  document.getElementById('ind-md').textContent       = fmt(ind.monthlyD);
+  document.getElementById('ind-mk-sig').innerHTML     = kdSig(ind.monthlyK, ind.monthlyD);
+  document.getElementById('ind-rsi').textContent      = fmt(ind.rsi);
+  document.getElementById('ind-rsi-sig').innerHTML    = rsiSig(ind.rsi);
+
+  panel.style.display = 'flex';
 }
 
 // ── Chart ──────────────────────────────────────────────────
@@ -46,7 +89,14 @@ async function loadChart(symbol, name) {
     `;
   }
 
-  const ohlc = await fetchChart(symbol, state.currentRange);
+  // 圖表資料 + 指標同步抓取（指標依 symbol 快取，換 range 不重抓）
+  const needInd = !state.indicatorCache[symbol];
+  const [ohlc, freshInd] = await Promise.all([
+    fetchChart(symbol, state.currentRange),
+    needInd ? fetchIndicators(symbol) : Promise.resolve(null),
+  ]);
+  if (freshInd) state.indicatorCache[symbol] = freshInd;
+
   loading.style.display = 'none';
 
   if (!ohlc || ohlc.length === 0) {
@@ -56,6 +106,7 @@ async function loadChart(symbol, name) {
   }
 
   drawChart(ohlc, q);
+  renderIndicators(state.indicatorCache[symbol] || null, q);
 }
 
 // ── Watchlist actions ──────────────────────────────────────
@@ -92,6 +143,7 @@ function removeStock(e, symbol) {
   state.watchlist = state.watchlist.filter(s => s.symbol !== symbol);
   saveWatchlist();
   delete state.quoteCache[symbol];
+  delete state.indicatorCache[symbol];
   if (state.currentSymbol === symbol) {
     state.currentSymbol = null;
     document.getElementById('chart-symbol').textContent = '選擇股票';

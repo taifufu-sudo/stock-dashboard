@@ -10,4 +10,5 @@ export const state = {
   currentTab:      'all',
   autoRefreshTimer: null,
   maEnabled:       { 5: true, 20: true, 60: true },
+  indicatorCache:  {},
 };

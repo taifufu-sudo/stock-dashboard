@@ -73,6 +73,43 @@
       <div id="chart-container">
         <div id="chart-loading">點擊左側股票查看圖表</div>
       </div>
+      <!-- 技術指標面板（JS 載入後顯示） -->
+      <div id="indicators-panel" class="indicators-panel">
+        <div class="ind-group">
+          <div class="ind-group-title">均線 (日)</div>
+          <div class="ind-row">
+            <div class="ind-item"><span class="ind-label">MA5</span><span class="ind-value" id="ind-ma5">--</span></div>
+            <div class="ind-item"><span class="ind-label">MA20</span><span class="ind-value" id="ind-ma20">--</span></div>
+            <div class="ind-item"><span class="ind-label">MA60</span><span class="ind-value" id="ind-ma60">--</span></div>
+          </div>
+        </div>
+        <div class="ind-sep"></div>
+        <div class="ind-group">
+          <div class="ind-group-title">日 KD (9)</div>
+          <div class="ind-row">
+            <div class="ind-item"><span class="ind-label">K</span><span class="ind-value" id="ind-dk">--</span></div>
+            <div class="ind-item"><span class="ind-label">D</span><span class="ind-value" id="ind-dd">--</span></div>
+            <span id="ind-dk-sig"></span>
+          </div>
+        </div>
+        <div class="ind-sep"></div>
+        <div class="ind-group">
+          <div class="ind-group-title">月 KD (9)</div>
+          <div class="ind-row">
+            <div class="ind-item"><span class="ind-label">K</span><span class="ind-value" id="ind-mk">--</span></div>
+            <div class="ind-item"><span class="ind-label">D</span><span class="ind-value" id="ind-md">--</span></div>
+            <span id="ind-mk-sig"></span>
+          </div>
+        </div>
+        <div class="ind-sep"></div>
+        <div class="ind-group">
+          <div class="ind-group-title">日 RSI (14)</div>
+          <div class="ind-row">
+            <div class="ind-item"><span class="ind-value" id="ind-rsi">--</span></div>
+            <span id="ind-rsi-sig"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
