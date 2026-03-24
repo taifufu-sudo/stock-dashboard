@@ -63,6 +63,12 @@
           <button class="range-btn" onclick="app.changeRange('1y',this)">1年</button>
           <button class="range-btn" onclick="app.changeRange('5y',this)">5年</button>
         </div>
+        <div class="ma-btns">
+          <span class="ma-label">均線</span>
+          <button class="ma-btn ma5  active" onclick="app.toggleMA(5, this)">MA5</button>
+          <button class="ma-btn ma20 active" onclick="app.toggleMA(20,this)">MA20</button>
+          <button class="ma-btn ma60 active" onclick="app.toggleMA(60,this)">MA60</button>
+        </div>
       </div>
       <div id="chart-container">
         <div id="chart-loading">點擊左側股票查看圖表</div>

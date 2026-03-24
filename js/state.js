@@ -9,4 +9,5 @@ export const state = {
   chartInstance:   null,
   currentTab:      'all',
   autoRefreshTimer: null,
+  maEnabled:       { 5: true, 20: true, 60: true },
 };

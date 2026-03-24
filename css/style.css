@@ -199,7 +199,29 @@ header {
 .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; }
 .stat-value { font-size: 13px; font-variant-numeric: tabular-nums; }
 
-.range-btns { display: flex; gap: 4px; padding: 0 20px 14px; }
+.range-btns { display: flex; gap: 4px; padding: 0 20px 8px; }
+
+.ma-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px 14px;
+}
+.ma-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; margin-right: 2px; }
+.ma-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ma-btn.ma5.active  { border-color: #ffa726; color: #ffa726; background: rgba(255,167,38,0.1); }
+.ma-btn.ma20.active { border-color: #42a5f5; color: #42a5f5; background: rgba(66,165,245,0.1); }
+.ma-btn.ma60.active { border-color: #ab47bc; color: #ab47bc; background: rgba(171,71,188,0.1); }
 .range-btn {
   background: transparent;
   border: 1px solid var(--border);

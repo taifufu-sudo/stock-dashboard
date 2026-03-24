@@ -151,8 +151,18 @@ function startAutoRefresh() {
   }, 60000);
 }
 
+// ── MA toggle ──────────────────────────────────────────────
+function toggleMA(period, btn) {
+  state.maEnabled[period] = !state.maEnabled[period];
+  btn.classList.toggle('active', state.maEnabled[period]);
+  if (state.currentSymbol && state.currentRange !== '1d') {
+    const s = state.watchlist.find(w => w.symbol === state.currentSymbol);
+    loadChart(state.currentSymbol, s ? s.name : state.currentSymbol);
+  }
+}
+
 // ── Expose to window for inline HTML onclick handlers ──────
-window.app = { loadChart, addStock, removeStock, switchTab, changeRange, refreshAll };
+window.app = { loadChart, addStock, removeStock, switchTab, changeRange, refreshAll, toggleMA };
 
 // ── Init ───────────────────────────────────────────────────
 setInterval(updateClock, 1000);

@@ -1,5 +1,20 @@
 import { state } from './state.js';
 
+const MA_CONFIG = [
+  { period: 5,  color: '#ffa726' },
+  { period: 20, color: '#42a5f5' },
+  { period: 60, color: '#ab47bc' },
+];
+
+function calcMA(data, period) {
+  const result = [];
+  for (let i = period - 1; i < data.length; i++) {
+    const sum = data.slice(i - period + 1, i + 1).reduce((acc, d) => acc + d.close, 0);
+    result.push({ time: data[i].time, value: +(sum / period).toFixed(4) });
+  }
+  return result;
+}
+
 export function drawChart(ohlc, quote) {
   const container = document.getElementById('chart-container');
 
@@ -46,6 +61,23 @@ export function drawChart(ohlc, quote) {
       wickUpColor:   upColor, wickDownColor:   downColor,
     });
     candleSeries.setData(ohlc);
+  }
+
+  // MA lines（僅限非當日 K 線，才有統計意義）
+  if (state.currentRange !== '1d') {
+    for (const { period, color } of MA_CONFIG) {
+      if (!state.maEnabled[period]) continue;
+      const maData = calcMA(ohlc, period);
+      if (maData.length === 0) continue;
+      const maSeries = chart.addLineSeries({
+        color,
+        lineWidth: 1,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      });
+      maSeries.setData(maData);
+    }
   }
 
   chart.timeScale().fitContent();
