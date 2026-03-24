@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>股市觀察板 — 架構圖</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    padding: 40px 24px;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #7986cb;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #8892a4;
+    margin-bottom: 48px;
+  }
+
+  /* ── Data Flow ─────────────────────────────────────── */
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #8892a4;
+    margin-bottom: 12px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    background: #1a1d2e;
+    border: 1.5px solid #2e3155;
+    border-radius: 10px;
+    padding: 14px 22px;
+    text-align: center;
+    min-width: 130px;
+  }
+  .flow-node .node-icon { font-size: 22px; margin-bottom: 4px; }
+  .flow-node .node-title { font-size: 13px; font-weight: 600; }
+  .flow-node .node-sub { font-size: 10px; color: #8892a4; margin-top: 2px; }
+  .flow-node.accent { border-color: #5c6bc0; }
+  .flow-node.green  { border-color: #26a69a; }
+  .flow-node.yellow { border-color: #ffa726; }
+
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    color: #8892a4;
+    font-size: 11px;
+    gap: 2px;
+  }
+  .arrow-line {
+    width: 40px;
+    height: 1.5px;
+    background: #2e3155;
+    position: relative;
+  }
+  .arrow-line::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    border: 4px solid transparent;
+    border-left-color: #2e3155;
+    border-right: none;
+  }
+  .arrow-label { font-size: 10px; color: #8892a4; white-space: nowrap; }
+
+  /* ── Page Layout ───────────────────────────────────── */
+  .page-wrap {
+    max-width: 860px;
+    margin: 0 auto 48px;
+    border: 1.5px solid #2e3155;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* browser chrome */
+  .browser-bar {
+    background: #252840;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #2e3155;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ef5350; }
+  .dot-y { background: #ffa726; }
+  .dot-g { background: #26a69a; }
+  .url-bar {
+    flex: 1;
+    background: #1a1d2e;
+    border: 1px solid #2e3155;
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #8892a4;
+    margin-left: 8px;
+  }
+
+  /* page contents */
+  .page-inner { padding: 16px; background: #0f1117; }
+
+  .comp {
+    border: 1.5px dashed #2e3155;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .comp:hover { border-color: #5c6bc0; }
+  .comp-label {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    background: #0f1117;
+    padding: 0 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .comp-label.blue  { color: #7986cb; }
+  .comp-label.teal  { color: #26a69a; }
+  .comp-label.orange{ color: #ffa726; }
+  .comp-label.pink  { color: #ec407a; }
+
+  .comp-desc {
+    font-size: 11px;
+    color: #8892a4;
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    background: #1a1d2e;
+    border: 1px solid #2e3155;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: #c5cae9;
+  }
+  .tag.hi { border-color: #5c6bc0; color: #7986cb; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mini-block {
+    background: #1a1d2e;
+    border: 1px solid #2e3155;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .mini-block .mb-title { font-weight: 600; margin-bottom: 3px; }
+  .mini-block .mb-desc  { color: #8892a4; font-size: 10px; line-height: 1.5; }
+
+  /* ── State ─────────────────────────────────────────── */
+  .state-grid {
+    max-width: 860px;
+    margin: 0 auto 48px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .state-card {
+    background: #1a1d2e;
+    border: 1.5px solid #2e3155;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .state-card .sc-title { font-size: 12px; font-weight: 600; color: #7986cb; margin-bottom: 8px; }
+  .state-card ul { list-style: none; }
+  .state-card li { font-size: 11px; color: #8892a4; padding: 2px 0; }
+  .state-card li::before { content: '▸ '; color: #5c6bc0; }
+
+  /* ── Legend ────────────────────────────────────────── */
+  .legend {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8892a4; }
+  .legend-box  { width: 14px; height: 14px; border-radius: 3px; }
+
+  .section { max-width: 860px; margin: 0 auto 12px; }
+</style>
+</head>
+<body>
+
+<h1>股市觀察板 — 架構圖</h1>
+<p class="subtitle">stock-dashboard v1.0.0 &nbsp;|&nbsp; taifufu-sudo.github.io/stock-dashboard</p>
+
+<!-- ── 1. Data Flow ── -->
+<div class="section">
+  <div class="section-label">1. 資料流向</div>
+</div>
+<div class="flow-row">
+  <div class="flow-node yellow">
+    <div class="node-icon">📈</div>
+    <div class="node-title">Yahoo Finance</div>
+    <div class="node-sub">非官方 API</div>
+  </div>
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">HTTPS</div>
+  </div>
+  <div class="flow-node accent">
+    <div class="node-icon">🔀</div>
+    <div class="node-title">CORS Proxy</div>
+    <div class="node-sub">corsproxy.io</div>
+  </div>
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">JSON</div>
+  </div>
+  <div class="flow-node green">
+    <div class="node-icon">🌐</div>
+    <div class="node-title">瀏覽器</div>
+    <div class="node-sub">index.html</div>
+  </div>
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">render</div>
+  </div>
+  <div class="flow-node">
+    <div class="node-icon">👤</div>
+    <div class="node-title">使用者</div>
+    <div class="node-sub">看盤</div>
+  </div>
+</div>
+
+<!-- ── 2. Page Layout ── -->
+<div class="section">
+  <div class="section-label">2. 頁面元件結構</div>
+</div>
+<div class="page-wrap">
+  <div class="browser-bar">
+    <div class="dot dot-r"></div>
+    <div class="dot dot-y"></div>
+    <div class="dot dot-g"></div>
+    <div class="url-bar">taifufu-sudo.github.io/stock-dashboard/</div>
+  </div>
+  <div class="page-inner">
+
+    <!-- Header -->
+    <div class="comp">
+      <span class="comp-label blue">Header</span>
+      <div class="comp-desc">頂部導覽列（sticky）</div>
+      <div class="tag-row">
+        <span class="tag">Logo / 標題</span>
+        <span class="tag">即時時鐘</span>
+        <span class="tag hi">手動更新按鈕</span>
+      </div>
+    </div>
+
+    <!-- Indices Bar -->
+    <div class="comp">
+      <span class="comp-label teal">Indices Bar — 大盤指數列</span>
+      <div class="comp-desc">橫向捲動，每 60 秒自動更新</div>
+      <div class="three-col">
+        <div class="mini-block"><div class="mb-title">台灣加權 ^TWII</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+        <div class="mini-block"><div class="mb-title">S&P 500 ^GSPC</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+        <div class="mini-block"><div class="mb-title">Nasdaq ^IXIC</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+        <div class="mini-block"><div class="mb-title">Dow Jones ^DJI</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+        <div class="mini-block"><div class="mb-title">日經 ^N225</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+        <div class="mini-block"><div class="mb-title">恆生 ^HSI</div><div class="mb-desc">價格 / 漲跌 / %</div></div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="comp">
+      <span class="comp-label orange">Main Grid — 主要內容區（2欄）</span>
+      <div class="comp-desc">左側自選股列表，右側圖表</div>
+      <div class="two-col">
+
+        <!-- Watchlist -->
+        <div class="comp" style="margin-bottom:0">
+          <span class="comp-label pink">Watchlist 自選股</span>
+          <div class="comp-desc">寬度固定 340px</div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">搜尋列</div>
+            <div class="mb-desc">輸入代碼 → Enter 新增<br>4 位數自動補 .TW</div>
+          </div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">分頁 Tabs</div>
+            <div class="mb-desc">全部 / 台股 / 美股</div>
+          </div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">股票列表</div>
+            <div class="mb-desc">代碼、名稱、現價、漲跌%<br>點擊 → 載入圖表<br>✕ 移除自選股</div>
+          </div>
+          <div class="mini-block">
+            <div class="mb-title">狀態列</div>
+            <div class="mb-desc">即時報價 • 最後更新時間</div>
+          </div>
+        </div>
+
+        <!-- Chart Panel -->
+        <div class="comp" style="margin-bottom:0">
+          <span class="comp-label blue">Chart Panel 圖表區</span>
+          <div class="comp-desc">彈性寬度，填滿剩餘空間</div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">個股資訊</div>
+            <div class="mb-desc">代碼、現價、漲跌金額 / %</div>
+          </div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">統計列</div>
+            <div class="mb-desc">開盤 / 最高 / 最低 / 量 / 市值</div>
+          </div>
+          <div class="mini-block" style="margin-bottom:6px">
+            <div class="mb-title">時間範圍切換</div>
+            <div class="mb-desc">1日 5日 1月 3月 6月 1年 5年</div>
+          </div>
+          <div class="mini-block">
+            <div class="mb-title">Lightweight Charts</div>
+            <div class="mb-desc">1日 → 面積圖（5m）<br>其他 → K 線圖</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 3. State ── -->
+<div class="section">
+  <div class="section-label">3. 狀態管理</div>
+</div>
+<div class="state-grid">
+  <div class="state-card">
+    <div class="sc-title">localStorage（持久化）</div>
+    <ul>
+      <li>自選股清單 watchlist</li>
+    </ul>
+  </div>
+  <div class="state-card">
+    <div class="sc-title">記憶體（執行期間）</div>
+    <ul>
+      <li>quoteCache — 報價快取</li>
+      <li>currentSymbol — 目前選股</li>
+      <li>currentRange — 時間範圍</li>
+      <li>currentTab — 分頁狀態</li>
+      <li>chartInstance — 圖表物件</li>
+    </ul>
+  </div>
+  <div class="state-card">
+    <div class="sc-title">定時器</div>
+    <ul>
+      <li>Clock — 每 1 秒</li>
+      <li>autoRefresh — 每 60 秒</li>
+      <li>ResizeObserver — 視窗縮放</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Legend ── -->
+<div class="legend" style="margin-top:32px;">
+  <div class="legend-item"><div class="legend-box" style="background:#5c6bc055;border:1.5px solid #5c6bc0"></div> 主要元件</div>
+  <div class="legend-item"><div class="legend-box" style="background:#26a69a22;border:1.5px solid #26a69a"></div> 資料相關</div>
+  <div class="legend-item"><div class="legend-box" style="background:#ffa72622;border:1.5px solid #ffa726"></div> 外部服務</div>
+  <div class="legend-item"><div class="legend-box" style="background:#1a1d2e;border:1.5px dashed #2e3155"></div> 區塊容器</div>
+</div>
+
+</body>
+</html>
