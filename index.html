@@ -648,8 +648,8 @@ async function addStock() {
   const input = document.getElementById('symbol-input');
   let sym = input.value.trim().toUpperCase();
   if (!sym) return;
-  // Auto-append .TW for 4-digit numbers
-  if (/^\d{4}$/.test(sym)) sym = sym + '.TW';
+  // Auto-append .TW for 4–6 digit Taiwan stock/ETF codes
+  if (/^\d{4,6}$/.test(sym)) sym = sym + '.TW';
 
   if (watchlist.find(s => s.symbol === sym)) {
     showToast(`${sym} 已在自選股中`);
